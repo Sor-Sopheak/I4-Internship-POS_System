@@ -1,4 +1,4 @@
-# I4-Internship-POS_System
+# I4-Internship-Self-Ordering-POS-System
 
 
 It contains branches: Nestjs, Vuejs, and Flutter.
