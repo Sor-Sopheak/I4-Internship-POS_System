@@ -2,7 +2,6 @@
 
 
 It contains branches: Nest.js, Vue.js, and Flutter.
-====================================================
 
 In this project
   - Nest.js is used for the server
