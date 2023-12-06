@@ -1,7 +1,7 @@
 # I4-Internship-POS_System
 
 
-It contains branches: Nest.js, Vue.js, and Flutter.
+It contains branches: Nestjs, Vuejs, and Flutter.
 
 In this project
   - Nest.js is used for the server
