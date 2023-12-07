@@ -1,0 +1,54 @@
+variables:
+  IMAGE_NAME: "vue-sos:latest"
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "beta"
+
+stages:
+  - build-image
+  - deploy-image
+  - telegram
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    
+build-image:
+  stage: build-image
+  image: docker:stable
+  services:
+    - docker:20.10.16-dind
+  script:
+    - docker build -t $CI_REGISTRY/i4-internship/self-ordering-pos-system-vuejs/$IMAGE_NAME .
+    - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
+    - docker push $CI_REGISTRY/i4-internship/self-ordering-pos-system-vuejs/$IMAGE_NAME
+
+
+deploy-image:
+  stage: deploy-image
+  image: alpine
+  environment:
+    name: deploy-sos
+  before_script:
+    - apk update && apk add openssh-client
+    - eval $(ssh-agent -s)
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 700 ~/.ssh/id_rsa
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - apk add --no-cache git curl
+   
+  script:
+    - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $SSH_USER@$VM_IPADDRESS 'cd /root && docker-compose pull && docker-compose up -d --build && docker ps'
+   
+telegram:
+  stage: telegram
+  before_script:
+    - chmod +x telegram.sh
+  script:
+    - bash -e telegram.sh $CI_JOB_STATUS
+
+     
